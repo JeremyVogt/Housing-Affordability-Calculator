@@ -8,6 +8,7 @@ COMP 4710 Project - Fall 2014
 
 import csv
 
+
 def load_data(fname):
     datafile = open(fname, 'r')
     reader = csv.reader(datafile, delimiter=',', quotechar='"')
@@ -54,11 +55,12 @@ def load_data(fname):
             row_dict["avg_rent"] = int(cur_avg_rent) * 12
             row_dict["avg_income"] = int(cur_avg_income)
         else:
-            continue # Discard all other rows.
+            continue  # Discard all other rows.
         data.append(row_dict)
     datafile.close()
     return data
-    
+
+
 def get_percentage(results, numerator, denominator, ascending):
     sorted_list = []
     for place in results:
@@ -70,8 +72,9 @@ def get_percentage(results, numerator, denominator, ascending):
     if (ascending == False):
         sorted_list.reverse()
     for data_point in sorted_list:
-        print(data_point[0] + " - %.1f%%" % data_point[1])
-        
+        outputfile.write(data_point[0] + " - %.1f%%\n" % data_point[1])
+
+
 def get_absolute(results, desired_variable, ascending):
     sorted_list = []
     for place in results:
@@ -83,8 +86,9 @@ def get_absolute(results, desired_variable, ascending):
     if (ascending == False):
         sorted_list.reverse()
     for data_point in sorted_list:
-        print(data_point[0] + " - %d" % data_point[1])
-        
+        outputfile.write(data_point[0] + " - %d\n" % data_point[1])
+
+
 def get_difference(results, minuend, subtrahend, ascending):
     sorted_list = []
     for place in results:
@@ -96,38 +100,63 @@ def get_difference(results, minuend, subtrahend, ascending):
     if (ascending == False):
         sorted_list.reverse()
     for data_point in sorted_list:
-        print(data_point[0] + " - %d" % data_point[1])
-        
+        outputfile.write(data_point[0] + " - %d\n" % data_point[1])
+
+
 def header(to_be_printed):
-    print("\n" + to_be_printed)
-    print("=" * len(to_be_printed))
-    
+    outputfile.write(to_be_printed + "\n")
+    outputfile.write("=" * len(to_be_printed) + "\n")
+
+
 def main():
-    results = load_data("metros.csv")
+    # Get names of input and output files from user
+    gooddata = False
+    goodoutput = False
+    while gooddata == False:
+        # Ensure user enters a file that exists
+        try:
+            datafname = input("Enter data file:")
+            results = load_data(datafname)
+        except:
+            print("Data file cannot be found or is in wrong format. Please enter a different filename.")
+        else:
+            gooddata = True
+    global outputfile
+    while goodoutput == False:
+        # Create a new file; prevent user from overwriting any existing files
+        try:
+            outputfname = input("Enter output file:")
+            outputfile = open(outputfname, "x")
+        except:
+            print("File already exists. Please enter a different filename.")
+        else:
+            goodoutput = True
     header("Percentage of households in owned dwellings:")
     get_percentage(results, "own", "households", False)
-    header("Percentage of households in rented dwellings:")
+    header("\nPercentage of households in rented dwellings:")
     get_percentage(results, "rent", "households", False)
-    header("Average annual shelter costs for owner-occupied dwellings:")
+    header("\nAverage annual shelter costs for owner-occupied dwellings:")
     get_absolute(results, "avg_own", False)
-    header("Average annual shelter costs for rented dwellings:")
+    header("\nAverage annual shelter costs for rented dwellings:")
     get_absolute(results, "avg_rent", False)
-    header("Average annual after-tax income per household:")
+    header("\nAverage annual after-tax income per household:")
     get_absolute(results, "avg_income", False)
-    header("Average percentage of income spent on shelter costs for homeowners:")
+    header("\nAverage percentage of income spent on shelter costs for homeowners:")
     get_percentage(results, "avg_own", "avg_income", False)
-    header("Average percentage of income spent on shelter costs for renters:")
+    header("\nAverage percentage of income spent on shelter costs for renters:")
     get_percentage(results, "avg_rent", "avg_income", False)
-    header("Percentage of households spending over 30% of income on shelter costs:")
+    header("\nPercentage of households spending over 30% of income on shelter costs:")
     get_percentage(results, "over_thirty", "households", False)
-    header("Average income left over after shelter costs for homeowners:")
+    header("\nAverage income left over after shelter costs for homeowners:")
     get_difference(results, "avg_income", "avg_own", False)
-    header("Average income left over after shelter costs for renters:")
+    header("\nAverage income left over after shelter costs for renters:")
     get_difference(results, "avg_income", "avg_rent", False)
-    header("Average value of dwellings:")
+    header("\nAverage value of dwellings:")
     get_absolute(results, "avg_value", False)
-    header("Average value of dwellings relative to average income:")
+    header("\nAverage value of dwellings relative to average income:")
     get_percentage(results, "avg_value", "avg_income", False)
-    print("\nDone. *whew*")
-    
+    outputfile.write("\nDone. *whew*")
+    outputfile.close()
+
+
 main()
